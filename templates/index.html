@@ -1,0 +1,76 @@
+<!doctype html>
+<html>
+  <head>
+    <title>電影情感分析系統</title>
+    <link rel="stylesheet" href="/static/style.css" />
+  </head>
+
+  <body>
+    <div class="main-layout">
+      <!-- 左側 -->
+      <div class="left-panel">
+        <h1>🎬 電影評論情感分析</h1>
+
+        <button onclick="analyze()" class="main-btn">📊 分析全部評論</button>
+
+        <h2 id="result"></h2>
+
+        <div class="chart-container">
+          <canvas id="chart"></canvas>
+        </div>
+      </div>
+
+      <!-- 右側 -->
+      <div class="right-panel">
+        <!-- 🎬 選擇電影 -->
+        <div class="card">
+          <h3>🎬 選擇電影分析</h3>
+          <input id="movieInput" placeholder="輸入電影名稱..." />
+          <button onclick="crawlMovie()">抓取評論</button>
+        </div>
+
+        <!-- 🔥 關鍵字 -->
+        <div class="card">
+          <h3>🔥 熱門關鍵字</h3>
+          <ul id="keywords"></ul>
+        </div>
+
+        <!-- 📝 評論 -->
+        <div class="card">
+          <h3>📝 評論內容</h3>
+          <ul id="reviews"></ul>
+        </div>
+
+        <!-- ⚔️ 比較 -->
+        <div class="card">
+          <h3>⚔️ 電影比較</h3>
+          <button onclick="compare()">比較兩部電影</button>
+          <p id="compareResult"></p>
+        </div>
+
+        <!-- ✏️ 單句分析 -->
+        <div class="card">
+          <h3>✏️ 輸入評論分析</h3>
+          <input id="userText" placeholder="輸入評論..." />
+          <button onclick="analyzeText()">分析</button>
+          <p id="userResult"></p>
+        </div>
+
+        <!-- 🤖 AI 區 -->
+        <div class="card ai-card">
+          <h3>🤖 AI 情感分析助手</h3>
+
+          <div id="aiBox" class="ai-box"></div>
+
+          <div class="ai-input">
+            <input id="aiInput" placeholder="輸入一句評論..." />
+            <button onclick="askAI()">送出</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="/static/script.js"></script>
+  </body>
+</html>
