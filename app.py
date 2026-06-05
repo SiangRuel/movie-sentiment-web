@@ -79,11 +79,40 @@ def analyze_sentiment_rule(text):
 
 # ⭐ 關鍵字（支援中文）
 def get_keywords(data):
-    words = []
-    for r in data:
-        words += re.findall(r"[\u4e00-\u9fff]+|\b\w+\b", r.lower())
-    return Counter(words).most_common(10)
 
+    stop_words = {
+        "電影",
+        "真的",
+        "覺得",
+        "就是",
+        "這部",
+        "一下",
+        "可以",
+        "看到",
+        "不是",
+        "什麼",
+        "這個",
+        "那個",
+        "第",
+    }
+
+    words = []
+
+    for r in data:
+
+        ws = re.findall(
+            r"[\u4e00-\u9fff]{2,}",
+            r
+        )
+
+        for w in ws:
+
+            if w in stop_words:
+                continue
+
+            words.append(w)
+
+    return Counter(words).most_common(10)
 
 @app.route("/")
 def home():
@@ -164,10 +193,27 @@ def crawl_movie():
     import requests
     from bs4 import BeautifulSoup
 
-    url = "https://www.ptt.cc/bbs/movie/index.html"
-    headers = {"User-Agent": "Mozilla/5.0", "Cookie": "over18=1"}
+    url = f"https://www.ptt.cc/bbs/movie/search?q={keyword}"
 
-    res = requests.get(url, headers=headers)
+    headers = {
+        "User-Agent": (
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+            "AppleWebKit/537.36 (KHTML, like Gecko) "
+            "Chrome/137.0.0.0 Safari/537.36"
+        )
+    }
+
+    cookies = {
+        "over18": "1"
+    }
+
+    res = requests.get(
+        url,
+        headers=headers,
+        cookies=cookies,
+        timeout=15
+    )
+
     soup = BeautifulSoup(res.text, "html.parser")
 
     posts = soup.select(".title a")
@@ -178,22 +224,57 @@ def crawl_movie():
         title = p.text
 
         # ⭐ 關鍵：篩選電影名稱
-        if keyword.lower() in title.lower():
-            post_url = "https://www.ptt.cc" + p["href"]
+        post_url = "https://www.ptt.cc" + p["href"]
 
-            post_res = requests.get(post_url, headers=headers)
-            post_soup = BeautifulSoup(post_res.text, "html.parser")
+        post_res = requests.get(
+            post_url,
+            headers=headers,
+            timeout=15
+        )
 
-            pushes = post_soup.select(".push")
+        post_soup = BeautifulSoup(
+            post_res.text,
+            "html.parser"
+        )
 
-            for push in pushes:
-                content = push.select_one(".push-content")
-                if content:
-                    text = content.get_text().replace(":", "").strip()
-                    if len(text) > 5:
-                        comments.append(text)
+        pushes = post_soup.select(".push")
+
+        for push in pushes:
+
+            content = push.select_one(".push-content")
+
+            if content:
+                text = content.get_text() \
+                            .replace(":", "") \
+                            .strip()
+
+                if len(text) > 5:
+                    comments.append(text)
+                    
+    preds = [analyze_sentiment_rule(r) for r in comments]
+
+    review_data = [
+        {
+            "text": r,
+            "label": (
+                "🟢 正面" if p == 1
+                else "🔴 負面" if p == 0
+                else "⚪ 中立"
+            )
+        }
+        for r, p in zip(comments, preds)
+    ]
+
     print("抓到留言數：", len(comments))
-    return jsonify({"reviews": comments, "count": len(comments)})
+
+    return jsonify({
+        "total": len(comments),
+        "positive": preds.count(1),
+        "negative": preds.count(0),
+        "neutral": preds.count(-1),
+        "keywords": get_keywords(comments),
+        "reviews": review_data[:50]
+    })
 
 
 @app.route("/analyze_text_batch", methods=["POST"])
