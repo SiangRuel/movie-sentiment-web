@@ -5,6 +5,10 @@
     <title>Movie Sentiment Analysis System</title>
 
     <link rel="stylesheet" href="/static/style.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+    />
   </head>
 
   <body>
@@ -28,7 +32,10 @@
       <div class="right-panel">
         <!-- 電影資訊 -->
         <div class="card">
-          <h3>🎬 Movie Search / 電影搜尋</h3>
+          <h3>
+            <i class="fa-solid fa-film"></i>
+            Movie Search / 電影搜尋
+          </h3>
 
           <div class="search-row">
             <input
@@ -44,32 +51,45 @@
         <!-- 推薦 + AI摘要 -->
         <div class="dashboard-row">
           <div class="card half-card">
-            <h3>⭐ Recommendation Score / 推薦指數</h3>
-
+            <h3>
+              <i class="fa-solid fa-star"></i>
+              Recommendation Score / 推薦指數
+            </h3>
             <div id="recommendation"></div>
           </div>
 
           <div class="card half-card">
-            <h3>🧠 AI Summary / AI分析摘要</h3>
-
+            <h3>
+              <i class="fa-solid fa-brain"></i>
+              AI Summary / AI分析摘要
+            </h3>
             <div id="movieSummary"></div>
           </div>
         </div>
 
         <!-- 📝 評論 -->
         <div class="card">
-          <h3>📝 All Reviews / 全部評論</h3>
+          <h3>
+            <i class="fa-solid fa-comments"></i>
+            All Reviews / 全部評論
+          </h3>
           <ul id="reviews"></ul>
         </div>
 
         <div class="dashboard-row">
           <div class="card half-card">
-            <h3>😊 Top Positive Reviews / 最佳好評</h3>
+            <h3>
+              <i class="fa-solid fa-thumbs-up"></i>
+              Top Positive Reviews / 最佳好評
+            </h3>
             <div id="topPositive"></div>
           </div>
 
           <div class="card half-card">
-            <h3>😡 Top Negative Reviews / 最佳負評</h3>
+            <h3>
+              <i class="fa-solid fa-thumbs-down"></i>
+              Top Negative Reviews / 最佳負評
+            </h3>
             <div id="topNegative"></div>
           </div>
         </div>

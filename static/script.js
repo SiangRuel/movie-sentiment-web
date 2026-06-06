@@ -58,7 +58,21 @@ function updateUI(data) {
   rvList.innerHTML = "";
   data.reviews.forEach(r => {
     const li = document.createElement("li");
-    li.innerText = `${r.text} ${r.label}`;
+    li.innerHTML = `
+${r.text}
+
+<span class="${r.label.includes("正面")
+        ? "positive-tag"
+        : "negative-tag"
+      }">
+  <i class="${r.label.includes("正面")
+        ? "fa-solid fa-thumbs-up"
+        : "fa-solid fa-thumbs-down"
+      }"></i>
+
+  ${r.label}
+</span>
+`;
     rvList.appendChild(li);
   });
   // ⭐ Positive Reviews
@@ -106,45 +120,38 @@ function updateUI(data) {
 
   // ⭐ 推薦指數
 
-  let stars = "⭐";
   let grade = "D";
 
   if (positiveRate >= 90) {
-    stars = "⭐⭐⭐⭐⭐";
     grade = "A+";
   }
   else if (positiveRate >= 80) {
-    stars = "⭐⭐⭐⭐";
     grade = "A";
   }
   else if (positiveRate >= 70) {
-    stars = "⭐⭐⭐";
     grade = "B";
   }
   else if (positiveRate >= 60) {
-    stars = "⭐⭐";
     grade = "C";
   }
   else {
-    stars = "⭐";
     grade = "D";
   }
-
   const recommendBox =
     document.getElementById("recommendation");
 
   if (recommendBox) {
     recommendBox.innerHTML = `
-<div class="recommend-box">
+    <div class="recommend-box">
 
-  <h2>${stars}</h2>
+      <i class="fa-solid fa-award recommend-icon"></i>
 
-  <h1>${grade}</h1>
+      <h1>${grade}</h1>
 
-  <h3>好評率 ${positiveRate}%</h3>
+      <h3>好評率 ${positiveRate}%</h3>
 
-</div>
-`;
+    </div>
+    `;
   } const positiveReview =
     data.reviews.find(
       r => r.label.includes("正面")
@@ -196,14 +203,19 @@ function updateUI(data) {
 
   <hr>
 
-  <h4>🏆 Best Review</h4>
+  <h4>
+  <i class="fa-solid fa-trophy"></i>
+  Best Review
+</h4>
 
   <p>
     ${positiveReview?.text || "N/A"}
   </p>
 
-  <h4>⚠️ Worst Review</h4>
-
+  <h4>
+  <i class="fa-solid fa-circle-exclamation"></i>
+  Worst Review
+</h4>
   <p>
     ${negativeReview?.text || "N/A"}
   </p>
@@ -293,7 +305,7 @@ async function crawlMovie() {
   }
 
   document.getElementById("resultText").innerHTML =
-    "🔄 Loading...";
+    '<i class="fa-solid fa-spinner fa-spin"></i> Loading...'
 
   const res = await fetch("/crawl", {
     method: "POST",
@@ -336,17 +348,35 @@ async function crawlMovie() {
 
     <h2>${data.title}</h2>
 
-    <p>⭐ TMDB評分：${data.rating}</p>
+    <p>
+<i class="fa-solid fa-star"></i>
+TMDB評分：${data.rating}
+</p>
 
-    <p>👥 投票數：${data.vote_count}</p>
+<p>
+<i class="fa-solid fa-users"></i>
+投票數：${data.vote_count}
+</p>
 
-    <p>🔥 熱度：${Math.round(data.popularity)}</p>
+<p>
+<i class="fa-solid fa-fire"></i>
+熱度：${Math.round(data.popularity)}
+</p>
 
-    <p>🌍 語言：${data.original_language}</p>
+<p>
+<i class="fa-solid fa-globe"></i>
+語言：${data.original_language}
+</p>
 
-    <p>📅 上映日期：${data.release_date}</p>
+<p>
+<i class="fa-solid fa-calendar"></i>
+上映日期：${data.release_date}
+</p>
 
-    <p>📝 評論數：${data.total}</p>
+<p>
+<i class="fa-solid fa-comments"></i>
+評論數：${data.total}
+</p>
 
   </div>
 
@@ -354,7 +384,10 @@ async function crawlMovie() {
 
 <div class="movie-overview">
 
-  <h3>📖 劇情介紹</h3>
+  <h3>
+  <i class="fa-solid fa-book-open"></i>
+  劇情介紹
+</h3>
 
   <p>
     ${data.overview || "暫無劇情介紹"}
