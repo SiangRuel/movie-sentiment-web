@@ -2,6 +2,7 @@ from flask import Flask, render_template, jsonify, request
 import json
 from collections import Counter
 import re
+from transformers import pipeline
 
 app = Flask(__name__)
 
@@ -55,26 +56,24 @@ negative_words = [
     "不行",
 ]
 
+from transformers import pipeline
+
+classifier = pipeline(
+    "sentiment-analysis",
+    model="uer/roberta-base-finetuned-jd-binary-chinese"
+)
+
 
 # ⭐ 情感分析（含中立）
 def analyze_sentiment_rule(text):
-    text = text.lower()
-    score = 0
+    result = classifier(text[:512])[0]
 
-    for w in positive_words:
-        if w in text:
-            score += 1
+    label = result["label"].lower()
 
-    for w in negative_words:
-        if w in text:
-            score -= 1
-
-    if score > 0:
+    if "positive" in label:
         return 1
-    elif score < 0:
-        return 0
     else:
-        return -1  # 中立
+        return 0
 
 
 # ⭐ 關鍵字（支援中文）
@@ -220,11 +219,13 @@ def crawl_movie():
 
     comments = []
 
-    for p in posts[:20]:
+    for p in posts[:5]:
         title = p.text
 
         # ⭐ 關鍵：篩選電影名稱
         post_url = "https://www.ptt.cc" + p["href"]
+        print("文章標題：", title)
+        print("文章網址：", post_url)
 
         post_res = requests.get(
             post_url,
@@ -250,7 +251,7 @@ def crawl_movie():
 
                 if len(text) > 5:
                     comments.append(text)
-                    
+    comments = comments[:50]                
     preds = [analyze_sentiment_rule(r) for r in comments]
 
     review_data = [
