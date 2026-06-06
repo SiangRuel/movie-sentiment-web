@@ -13,7 +13,6 @@ TMDB_API_KEY = os.getenv("TMDB_API_KEY")
 print("TMDB KEY OK:", TMDB_API_KEY[:5])
 
 
-
 classifier = pipeline("sentiment-analysis")
 
 
@@ -69,8 +68,6 @@ def home():
     return render_template("index.html")
 
 
-
-
 # ⭐ 使用者輸入分析（修正中立）
 @app.route("/analyze_text", methods=["POST"])
 def analyze_text():
@@ -85,9 +82,6 @@ def analyze_text():
         label = "⚪ 中立"
 
     return jsonify({"result": label})
-
-
-
 
 
 @app.route("/crawl", methods=["POST"])
@@ -118,6 +112,12 @@ def crawl_movie():
 
     movie = movies[0]
     movie_id = movie["id"]
+    first_review_res = requests.get(
+        f"https://api.themoviedb.org/3/movie/{movie_id}/reviews",
+        params={"api_key": TMDB_API_KEY},
+    )
+
+    total_reviews = first_review_res.json().get("total_results", 0)
     video_res = requests.get(
         f"https://api.themoviedb.org/3/movie/{movie_id}/videos",
         params={"api_key": TMDB_API_KEY},
@@ -133,17 +133,30 @@ def crawl_movie():
             trailer_key = v.get("key")
             break
 
-    review_res = requests.get(
-        f"https://api.themoviedb.org/3/movie/{movie_id}/reviews",
-        params={"api_key": TMDB_API_KEY},
-    )
+    comments = []
 
-    review_data_raw = review_res.json().get("results", [])
+    for page in range(1, 6):  # 抓前5頁
 
-    comments = [r.get("content", "") for r in review_data_raw if r.get("content")]
+        review_res = requests.get(
+            f"https://api.themoviedb.org/3/movie/{movie_id}/reviews",
+            params={
+                "api_key": TMDB_API_KEY,
+                "page": page,
+            },
+        )
 
-    comments = comments[:20]
+        results = review_res.json().get("results", [])
 
+        if not results:
+            break
+
+        for r in results:
+
+            content = r.get("content", "")
+
+            if content:
+                comments.append(content)
+    print(f"TMDB總評論: {total_reviews} | " f"實際分析: {len(comments)}")
     preds = [analyze_sentiment_rule(c) for c in comments]
 
     review_data = [
@@ -166,7 +179,8 @@ def crawl_movie():
                 if movie.get("poster_path")
                 else ""
             ),
-            "total": len(comments),
+            "tmdb_total_reviews": total_reviews,
+            "analyzed_reviews": len(comments),
             "positive": preds.count(1),
             "negative": preds.count(0),
             "neutral": 0,

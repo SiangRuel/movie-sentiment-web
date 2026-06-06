@@ -4,17 +4,23 @@ let chart;
 // ⭐ 共用 UI 更新（🔥核心）
 function updateUI(data) {
   const positiveRate =
-    data.total > 0
-      ? ((data.positive / data.total) * 100).toFixed(1)
+    data.analyzed_reviews > 0
+      ? (
+        (data.positive / data.analyzed_reviews) *
+        100
+      ).toFixed(1)
       : 0;
 
   document.getElementById("resultText").innerHTML = `
 
 <div class="stat-box">
-  <div class="stat-value">${data.total}</div>
-  <div class="stat-label">總評論數</div>
+  <div class="stat-value">${data.tmdb_total_reviews}</div>
+  <div class="stat-label">TMDB評論數</div>
 </div>
-
+<div class="stat-box">
+  <div class="stat-value">${data.analyzed_reviews}</div>
+  <div class="stat-label">分析評論數</div>
+</div>
 <div class="stat-box">
   <div class="stat-value">${data.positive}</div>
   <div class="stat-label">正面評論</div>
@@ -25,10 +31,6 @@ function updateUI(data) {
   <div class="stat-label">負面評論</div>
 </div>
 
-<div class="stat-box">
-  <div class="stat-value">${positiveRate}%</div>
-  <div class="stat-label">好評率</div>
-</div>
 
 `;
 
@@ -226,7 +228,7 @@ ${r.text}
 <div class="summary-box">
 
   <p>
-    本次分析 ${data.total} 則評論，
+    本次分析 ${data.analyzed_reviews} 則評論，
     正面評論 ${data.positive} 則，
     負面評論 ${data.negative} 則。
   </p>
@@ -391,7 +393,7 @@ TMDB評分：${data.rating}
 
 <p>
 <i class="fa-solid fa-users"></i>
-投票數：${data.vote_count}
+評分人數：${data.vote_count}
 </p>
 
 <p>
@@ -411,7 +413,12 @@ TMDB評分：${data.rating}
 
 <p>
 <i class="fa-solid fa-comments"></i>
-評論數：${data.total}
+TMDB評論數：${data.tmdb_total_reviews}
+</p>
+
+<p>
+<i class="fa-solid fa-magnifying-glass-chart"></i>
+分析評論數：${data.analyzed_reviews}
 </p>
 
   </div>

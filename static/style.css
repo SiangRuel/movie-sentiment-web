@@ -95,7 +95,7 @@ input {
   padding: 10px;
   border-radius: 10px;
   border: none;
-  width: 70%;
+  width: 50%;
   margin-top: 10px;
   background: rgb(255 186 186 / 18%);
   color: white;
@@ -652,7 +652,7 @@ li {
 ====================== */
 
 .footer {
-  background: #380009;
+  background: #4b0019;
   backdrop-filter: blur(10px);
   border-top: 1px solid rgba(255, 255, 255, 0.08);
   padding: 30px 20px;
