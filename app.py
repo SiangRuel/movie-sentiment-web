@@ -219,7 +219,7 @@ def crawl_movie():
 
     comments = []
 
-    for p in posts[:5]:
+    for p in posts[:20]:
         title = p.text
 
         # ⭐ 關鍵：篩選電影名稱
