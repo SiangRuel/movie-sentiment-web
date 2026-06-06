@@ -2,9 +2,14 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>Movie Sentiment Analysis System</title>
-
+    <title>ScreenRadar</title>
+    <link
+      rel="icon"
+      type="image/png"
+      href="{{ url_for('static', filename='images/sr-logo.png') }}"
+    />
     <link rel="stylesheet" href="/static/style.css" />
+
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
@@ -12,12 +17,38 @@
   </head>
 
   <body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+      <div class="nav-logo">
+        <img
+          src="{{ url_for('static', filename='images/sr-logo.png') }}"
+          alt="ScreenRadar Logo"
+        />
+        <span>ScreenRadar</span>
+      </div>
+
+      <ul class="nav-links">
+        <li><a href="#">Home</a></li>
+        <li><a href="#movieInfo">Movie Search</a></li>
+        <li><a href="#recommendation">Recommendation</a></li>
+        <li><a href="#reviews">Reviews</a></li>
+        <li><a href="#">About</a></li>
+      </ul>
+    </nav>
+
     <div class="main-layout">
       <!-- 左側 -->
       <div class="left-panel">
-        <h1>🎬 AI Movie Sentiment Analysis System</h1>
+        <div class="hero-content">
+          <h1>Explore Movies Through Audience Voices</h1>
+
+          <p class="hero-subtitle">
+            Reviews, sentiment, and audience perspectives in one place.
+          </p>
+        </div>
 
         <div id="trailerArea"></div>
+
         <div id="result" class="result-card">
           <div class="stats-panel">
             <div id="resultText"></div>
@@ -33,7 +64,7 @@
 
       <!-- 右側 -->
       <div class="right-panel">
-        <!-- 電影資訊 -->
+        <!-- 電影搜尋 -->
         <div class="card">
           <h3>
             <i class="fa-solid fa-film"></i>
@@ -58,6 +89,7 @@
               <i class="fa-solid fa-star"></i>
               Recommendation Score / 推薦指數
             </h3>
+
             <div id="recommendation"></div>
           </div>
 
@@ -66,25 +98,29 @@
               <i class="fa-solid fa-brain"></i>
               AI Summary / AI分析摘要
             </h3>
+
             <div id="movieSummary"></div>
           </div>
         </div>
 
-        <!-- 📝 評論 -->
+        <!-- 全部評論 -->
         <div class="card">
           <h3>
             <i class="fa-solid fa-comments"></i>
             All Reviews / 全部評論
           </h3>
+
           <ul id="reviews"></ul>
         </div>
 
+        <!-- 好評與負評 -->
         <div class="dashboard-row">
           <div class="card half-card">
             <h3>
               <i class="fa-solid fa-thumbs-up"></i>
               Top Positive Reviews / 最佳好評
             </h3>
+
             <div id="topPositive"></div>
           </div>
 
@@ -93,6 +129,7 @@
               <i class="fa-solid fa-thumbs-down"></i>
               Top Negative Reviews / 最佳負評
             </h3>
+
             <div id="topNegative"></div>
           </div>
         </div>
