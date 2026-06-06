@@ -441,4 +441,30 @@ TMDB評分：${data.rating}
 
   // ⭐ ⭐ ⭐ 直接用 crawl 回傳更新全部 UI
   updateUI(data);
-}
+}// ======================
+// 回到頂部按鈕
+// ======================
+
+const backToTop =
+  document.getElementById("backToTop");
+
+window.addEventListener(
+  "scroll",
+  () => {
+    if (window.scrollY > 300) {
+      backToTop.classList.add("show");
+    } else {
+      backToTop.classList.remove("show");
+    }
+  }
+);
+
+backToTop.addEventListener(
+  "click",
+  () => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  }
+);

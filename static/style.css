@@ -97,7 +97,7 @@ input {
   border: none;
   width: 70%;
   margin-top: 10px;
-  background: rgba(255, 255, 255, 0.08);
+  background: rgb(255 186 186 / 18%);
   color: white;
 }
 
@@ -118,7 +118,7 @@ button {
 }
 
 button:hover {
-  background: #475569;
+  background: #993246;
 }
 
 /* ⭐ 滾動條（更細緻） */
@@ -646,4 +646,127 @@ li {
   display: flex;
   justify-content: center;
   align-items: center;
+}
+/* ======================
+   Footer
+====================== */
+
+.footer {
+  background: #380009;
+  backdrop-filter: blur(10px);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 30px 20px;
+  text-align: center;
+}
+
+.footer-content {
+  max-width: 1200px;
+  margin: auto;
+}
+
+.footer-logo {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.footer-logo img {
+  width: 40px;
+  height: 40px;
+}
+
+.footer-logo span {
+  font-size: 22px;
+  font-weight: 700;
+  color: rgb(141, 15, 42);
+}
+
+.footer p {
+  color: #ffe377;
+  margin: 10px 0;
+}
+
+.footer-links {
+  margin: 18px 0;
+}
+
+.footer-links a {
+  color: white;
+  text-decoration: none;
+  margin: 0 12px;
+  transition: 0.3s;
+}
+
+.footer-links a:hover {
+  color: #ff477b;
+}
+
+.footer-social {
+  margin: 15px 0;
+}
+
+.footer-social a {
+  color: white;
+  font-size: 22px;
+  margin: 0 10px;
+  transition: 0.3s;
+}
+
+.copyright {
+  font-size: 14px;
+  opacity: 0.7;
+  margin-top: 15px;
+}
+/* ======================
+   Back To Top
+====================== */
+.back-to-top {
+  position: fixed;
+  bottom: 25px;
+  right: 25px;
+
+  width: 52px;
+  height: 52px;
+
+  border: none;
+  border-radius: 50%;
+
+  background: #ffc800; /* 單色 */
+
+  color: #2c0000;
+
+  font-size: 20px;
+
+  cursor: pointer;
+
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+
+  opacity: 0;
+  visibility: hidden;
+
+  transform: translateY(15px);
+
+  transition:
+    opacity 0.45s ease,
+    transform 0.45s ease,
+    background-color 0.25s ease,
+    box-shadow 0.25s ease;
+
+  z-index: 9999;
+}
+
+.back-to-top:hover {
+  background: #ed5454;
+
+  transform: translateY(-4px);
+
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.35);
+}
+.back-to-top.show {
+  opacity: 1;
+  visibility: visible;
+
+  transform: translateY(0);
 }
