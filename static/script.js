@@ -8,17 +8,28 @@ function updateUI(data) {
       ? ((data.positive / data.total) * 100).toFixed(1)
       : 0;
 
-  document.getElementById("resultText").innerHTML =
-    `
-總評論：${data.total}
-｜
-正面：${data.positive}
-｜
-負面：${data.negative}
-｜
-中立：${data.neutral}
-｜
-好評率：${positiveRate}%
+  document.getElementById("resultText").innerHTML = `
+
+<div class="stat-box">
+  <div class="stat-value">${data.total}</div>
+  <div class="stat-label">總評論數</div>
+</div>
+
+<div class="stat-box">
+  <div class="stat-value">${data.positive}</div>
+  <div class="stat-label">正面評論</div>
+</div>
+
+<div class="stat-box">
+  <div class="stat-value">${data.negative}</div>
+  <div class="stat-label">負面評論</div>
+</div>
+
+<div class="stat-box">
+  <div class="stat-value">${positiveRate}%</div>
+  <div class="stat-label">好評率</div>
+</div>
+
 `;
 
   // ⭐ 圖表
@@ -32,13 +43,34 @@ function updateUI(data) {
       labels: ["正面", "負面", "中立"],
       datasets: [{
         data: [data.positive, data.negative, data.neutral],
-        backgroundColor: ["#48d266", "#fb7185", "#94a3b8"]
+        backgroundColor: [
+          "#4ade80",
+          "#fb7185",
+          "#cbd5e1"
+        ]
       }]
     },
     options: {
       responsive: true,
       animation: { animateScale: true },
       plugins: {
+        legend: {
+          position: "bottom",
+          labels: {
+            color: "#fff",
+            padding: 20,
+            font: {
+              size: 14
+            }, elements: {
+              arc: {
+                borderWidth: 3,
+                borderColor: "#ffffff"
+              }
+            },
+
+          }
+        },
+
         tooltip: {
           callbacks: {
             label: function (context) {
@@ -304,8 +336,12 @@ async function crawlMovie() {
     return;
   }
 
-  document.getElementById("resultText").innerHTML =
-    '<i class="fa-solid fa-spinner fa-spin"></i> Loading...'
+  document.getElementById("resultText").innerHTML = `
+<div class="loading-box">
+  <div class="loader"></div>
+  <span>Loading...</span>
+</div>
+`;
 
   const res = await fetch("/crawl", {
     method: "POST",

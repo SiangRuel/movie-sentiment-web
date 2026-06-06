@@ -147,7 +147,7 @@ def crawl_movie():
     preds = [analyze_sentiment_rule(c) for c in comments]
 
     review_data = [
-        {"text": r[:300], "label": ("🟢 正面" if p == 1 else "🔴 負面")}
+        {"text": r[:300], "label": ("正面" if p == 1 else "負面")}
         for r, p in zip(comments, preds)
     ]
 
