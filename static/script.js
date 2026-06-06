@@ -339,6 +339,21 @@ async function crawlMovie() {
 
   const input =
     document.getElementById("movieInput");
+  document.getElementById("movieInfo").innerHTML = "";
+
+  document.getElementById("reviews").innerHTML = "";
+
+  document.getElementById("topPositive").innerHTML = "";
+
+  document.getElementById("topNegative").innerHTML = "";
+
+  document.getElementById("recommendation").innerHTML = "";
+
+  document.getElementById("movieSummary").innerHTML = "";
+
+  if (chart) {
+    chart.destroy();
+  }
 
   const keyword = input.value;
 
@@ -349,12 +364,15 @@ async function crawlMovie() {
 
   input.blur();   // ← 讓游標消失
 
-  document.getElementById("resultText").innerHTML = `
-<div class="loading-box">
+  document.body.insertAdjacentHTML(
+    "beforeend",
+    `
+<div id="globalLoading" class="loading-box">
   <div class="loader"></div>
   <span>Loading...</span>
 </div>
-`;
+`
+  );
 
   const res = await fetch("/crawl", {
     method: "POST",
@@ -362,6 +380,9 @@ async function crawlMovie() {
     body: JSON.stringify({ keyword })
   });
   const data = await res.json();
+  document
+    .getElementById("globalLoading")
+    ?.remove();
 
   console.log("crawl結果：", data);
   const trailerArea =
@@ -435,7 +456,59 @@ TMDB評論數：${data.tmdb_total_reviews}
   </div>
 
 </div>
+<div class="cast-section">
 
+  <h3>
+    <i class="fa-solid fa-user-group"></i>
+    Top Cast / 主要演員
+  </h3>
+
+  <div class="cast-wrapper">
+
+  <button
+    class="cast-arrow"
+    onclick="scrollCast(-300)"
+  >
+    <i class="fa-solid fa-chevron-left"></i>
+  </button>
+
+  <div
+    class="cast-list"
+    id="castList"
+  >
+
+    ${data.cast
+        ?.map(
+          actor => `
+        <div class="cast-card">
+
+          <img
+            src="${actor.profile}"
+            alt="${actor.name}"
+          >
+
+          <span>
+            ${actor.name}
+          </span>
+
+        </div>
+      `
+        )
+        .join("")
+      }
+
+  </div>
+
+  <button
+    class="cast-arrow"
+    onclick="scrollCast(300)"
+  >
+    <i class="fa-solid fa-chevron-right"></i>
+  </button>
+
+</div>
+
+</div>
 <div class="movie-overview">
 
   <h3>
@@ -486,6 +559,20 @@ backToTop.addEventListener(
     });
   }
 );
+function scrollCast(distance) {
+
+  const castList =
+    document.getElementById(
+      "castList"
+    );
+
+  if (!castList) return;
+
+  castList.scrollBy({
+    left: distance,
+    behavior: "smooth"
+  });
+}
 function quickSearch(movie) {
 
   const input =

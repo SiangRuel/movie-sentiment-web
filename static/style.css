@@ -4,8 +4,18 @@ body {
   background: radial-gradient(circle at top, #0f172a, #020617);
   color: white;
   font-family: "Segoe UI", sans-serif;
-}
 
+  animation: pageFadeIn 0.8s ease;
+}
+@keyframes pageFadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
 /* 🔥 主版面 */
 .main-layout {
   display: flex;
@@ -537,12 +547,25 @@ li {
   color: rgba(255, 255, 255, 0.7);
 }
 .loading-box {
+
+  position: fixed;
+
+  top: 0;
+  left: 0;
+
+  width: 100vw;
+  height: 100vh;
+
   display: flex;
-  align-items: center;
+
   justify-content: center;
+  align-items: center;
+
   gap: 16px;
 
-  min-height: 250px;
+  background: rgba(2, 6, 23, 0.75);
+
+  z-index: 99999;
 }
 
 .loader {
@@ -773,4 +796,103 @@ li {
 }
 #userArea {
   margin-left: 20px;
+}
+.cast-section {
+  margin-top: 25px;
+}
+
+.cast-list {
+  display: flex;
+
+  gap: 15px;
+
+  overflow-x: auto;
+
+  padding-bottom: 10px;
+
+  scrollbar-width: none; /* Firefox */
+}
+.cast-wrapper {
+  display: flex;
+
+  align-items: center;
+
+  gap: 10px;
+}
+
+.cast-list {
+  flex: 1;
+
+  display: flex;
+
+  gap: 15px;
+
+  overflow-x: auto;
+
+  scroll-behavior: smooth;
+
+  scrollbar-width: none;
+}
+
+.cast-list::-webkit-scrollbar {
+  display: none;
+}
+.cast-arrow {
+  width: 42px;
+
+  height: 42px;
+
+  border-radius: 50%;
+
+  border: none;
+
+  background: rgba(255, 255, 255, 0.08);
+
+  color: white;
+
+  cursor: pointer;
+
+  flex-shrink: 0;
+
+  transition: all 0.25s ease;
+}
+
+.cast-arrow:hover {
+  background: #a5364c;
+
+  transform: scale(1.1);
+}
+/* Chrome Edge Safari */
+.cast-list::-webkit-scrollbar {
+  display: none;
+}
+
+.cast-card {
+  min-width: 120px;
+
+  text-align: center;
+
+  flex-shrink: 0;
+}
+
+.cast-card img {
+  width: 100px;
+
+  height: 140px;
+
+  object-fit: cover;
+
+  border-radius: 12px;
+
+  border: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.cast-card span {
+  display: block;
+
+  margin-top: 8px;
+
+  font-size: 13px;
+
+  color: white;
 }

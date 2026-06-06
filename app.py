@@ -122,6 +122,32 @@ def crawl_movie():
 
     movie = movies[0]
     movie_id = movie["id"]
+    # =====================
+
+    # 主要演員
+    # =====================
+
+    credits_res = requests.get(
+        f"https://api.themoviedb.org/3/movie/{movie_id}/credits",
+        params={"api_key": TMDB_API_KEY},
+    )
+
+    cast = credits_res.json().get("cast", [])
+
+    cast_data = []
+
+    for actor in cast:
+
+        cast_data.append(
+            {
+                "name": actor.get("name"),
+                "profile": (
+                    "https://image.tmdb.org/t/p/w185" + actor["profile_path"]
+                    if actor.get("profile_path")
+                    else ""
+                ),
+            }
+        )
     first_review_res = requests.get(
         f"https://api.themoviedb.org/3/movie/{movie_id}/reviews",
         params={"api_key": TMDB_API_KEY},
@@ -177,6 +203,7 @@ def crawl_movie():
     return jsonify(
         {
             "title": movie.get("title"),
+            "cast": cast_data,
             "trailer_key": trailer_key,
             "rating": movie.get("vote_average"),
             "vote_count": movie.get("vote_count"),
