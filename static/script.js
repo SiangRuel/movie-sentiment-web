@@ -331,12 +331,18 @@ function typeEffect(text, container) {
 
 // ⭐ ⭐ ⭐ 關鍵修正（最重要‼️）
 async function crawlMovie() {
-  const keyword = document.getElementById("movieInput").value;
+
+  const input =
+    document.getElementById("movieInput");
+
+  const keyword = input.value;
 
   if (!keyword) {
     alert("請輸入電影名稱");
     return;
   }
+
+  input.blur();   // ← 讓游標消失
 
   document.getElementById("resultText").innerHTML = `
 <div class="loading-box">
@@ -475,3 +481,27 @@ backToTop.addEventListener(
     });
   }
 );
+function quickSearch(movie) {
+
+  const input =
+    document.getElementById(
+      "movieInput"
+    );
+
+  input.value = movie;
+
+  crawlMovie();
+}
+document
+  .getElementById("movieInput")
+  .addEventListener(
+    "keydown",
+    function (e) {
+
+      if (e.key === "Enter") {
+
+        crawlMovie();
+
+      }
+    }
+  );
