@@ -1,3 +1,8 @@
+if (
+  !sessionStorage.getItem("user")
+) {
+  window.location.href = "/login";
+}
 let chart;
 
 
@@ -505,3 +510,53 @@ document
       }
     }
   );
+// ======================
+// Login / Logout
+// ======================
+
+const userArea =
+  document.getElementById("userArea");
+
+if (userArea) {
+
+  const user =
+    sessionStorage.getItem("user");
+  if (user) {
+
+    userArea.innerHTML = `
+      <span class="user-name">
+        <i class="fa-solid fa-user"></i>
+        ${user}
+      </span>
+
+      <button
+        class="logout-btn"
+        onclick="logout()">
+        Logout
+      </button>
+    `;
+
+  } else {
+
+    userArea.innerHTML = `
+      <button
+        class="login-btn"
+        onclick="window.location.href='/login'">
+        Login
+      </button>
+    `;
+
+  }
+
+}
+
+function logout() {
+
+  sessionStorage.removeItem(
+    "user"
+  );
+
+  window.location.href =
+    "/login";
+
+}

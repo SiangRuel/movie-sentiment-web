@@ -1,4 +1,4 @@
-from flask import Flask, render_template, jsonify, request
+from flask import Flask, render_template, jsonify, request, redirect
 import json
 from collections import Counter
 import re
@@ -63,8 +63,18 @@ def get_keywords(data):
     return Counter(words).most_common(10)
 
 
+@app.route("/login")
+def login():
+    return render_template("login.html")
+
+
 @app.route("/")
 def home():
+    return redirect("/login")
+
+
+@app.route("/dashboard")
+def dashboard():
     return render_template("index.html")
 
 

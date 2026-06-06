@@ -1,0 +1,178 @@
+body {
+  margin: 0;
+
+  min-height: 100vh;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  background: radial-gradient(circle at top, #f8d987, #7a1731, #020617);
+
+  font-family: "Segoe UI", sans-serif;
+}
+
+.login-card {
+  width: 420px;
+
+  padding: 40px;
+
+  text-align: center;
+
+  border-radius: 24px;
+
+  background: rgba(255, 255, 255, 0.05);
+
+  backdrop-filter: blur(16px);
+
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.login-logo {
+  width: 90px;
+  margin-bottom: 15px;
+}
+
+.login-card h1 {
+  margin: 10px 0;
+
+  color: white;
+}
+
+.login-card p {
+  color: rgba(255, 255, 255, 0.7);
+
+  margin-bottom: 30px;
+}
+
+.input-group {
+  display: flex;
+
+  align-items: center;
+
+  gap: 10px;
+
+  margin-bottom: 15px;
+
+  background: rgba(255, 255, 255, 0.08);
+
+  padding: 12px;
+
+  border-radius: 12px;
+}
+
+.input-group input {
+  flex: 1;
+
+  border: none;
+
+  background: transparent;
+
+  color: white;
+
+  outline: none;
+  box-shadow: none;
+}
+.input-group input:focus {
+  outline: none;
+  box-shadow: none;
+}
+.input-group i {
+  color: #fbbf24;
+}
+
+.login-card {
+  width: 420px;
+
+  padding: 40px;
+
+  text-align: center;
+
+  border-radius: 24px;
+
+  background: rgba(255, 255, 255, 0.05);
+
+  backdrop-filter: blur(16px);
+
+  border: 1px solid rgba(255, 255, 255, 0.1);
+
+  animation: fadeUp 0.8s ease;
+}
+
+.login-card button:hover {
+  background: #c74865;
+}
+
+.demo-account {
+  margin-top: 20px;
+
+  color: rgba(255, 255, 255, 0.6);
+
+  font-size: 14px;
+}
+.input-group input::placeholder {
+  color: rgba(255, 255, 255, 0.674);
+
+  font-size: 16px;
+
+  font-weight: 500;
+}
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.input-group {
+  background: rgba(255, 255, 255, 0.1);
+
+  border: 1px solid transparent;
+
+  transition:
+    border-color 0.3s ease,
+    box-shadow 0.3s ease,
+    transform 0.3s ease;
+}
+
+.input-group:focus-within {
+  border: 1px solid rgba(251, 191, 36, 0.7);
+
+  box-shadow: 0 0 15px rgba(251, 191, 36, 0.3);
+
+  transform: translateY(-2px);
+}
+.login-card button {
+  width: 100%;
+
+  padding: 12px;
+
+  border: none;
+
+  border-radius: 12px;
+
+  background: #a5364c;
+
+  color: white;
+
+  font-size: 16px;
+
+  cursor: pointer;
+
+  transition: all 0.3s ease;
+}
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+  -webkit-text-fill-color: white !important;
+
+  -webkit-box-shadow: 0 0 0px 1000px transparent inset !important;
+
+  transition: background-color 9999s ease-in-out 0s;
+
+  caret-color: white;
+}

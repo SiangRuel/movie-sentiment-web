@@ -111,14 +111,14 @@ button {
   margin: 10px;
   border-radius: 10px;
   border: none;
-  background: #334155;
+  background: #ff70916d;
   color: white;
   cursor: pointer;
   transition: 0.2s;
 }
 
 button:hover {
-  background: #993246;
+  background: #993248;
 }
 
 /* ⭐ 滾動條（更細緻） */
@@ -580,7 +580,7 @@ li {
   z-index: 1000;
 
   display: flex;
-  justify-content: space-between;
+
   align-items: center;
 
   padding: 15px 40px;
@@ -595,10 +595,11 @@ li {
   gap: 30px;
 
   list-style: none;
-  margin: 0;
-  padding: 0;
-}
 
+  padding: 0;
+
+  margin: 0 0 0 auto;
+}
 .nav-links li {
   display: inline-block;
 }
@@ -769,4 +770,7 @@ li {
   visibility: visible;
 
   transform: translateY(0);
+}
+#userArea {
+  margin-left: 20px;
 }
