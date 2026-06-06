@@ -26,6 +26,8 @@ body {
   backdrop-filter: blur(16px);
 
   border: 1px solid rgba(255, 255, 255, 0.1);
+  position: relative;
+  z-index: 10;
 }
 
 .login-logo {
@@ -175,4 +177,25 @@ input:-webkit-autofill:focus {
   transition: background-color 9999s ease-in-out 0s;
 
   caret-color: white;
+}
+/* ======================
+   電影背景動畫
+====================== */
+.movie-bg {
+  position: fixed;
+  inset: 0;
+
+  overflow: hidden;
+
+  pointer-events: none;
+
+  z-index: 0;
+}
+
+.movie-icon {
+  position: absolute;
+
+  font-size: 50px;
+
+  color: rgba(255, 255, 255, 0.08);
 }
