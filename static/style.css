@@ -9,12 +9,13 @@ body {
 /* 🔥 主版面 */
 .main-layout {
   display: flex;
-  height: 100vh;
+  min-height: 100vh;
 }
 
 /* 左側 */
 .left-panel {
   flex: 1;
+  overflow-y: auto;
   padding: 40px;
   text-align: center;
   border-right: 1px solid rgba(255, 255, 255, 0.08);
@@ -24,7 +25,11 @@ body {
 .right-panel {
   flex: 1;
   padding: 25px;
+
+  height: 140vh;
   overflow-y: auto;
+
+  box-sizing: border-box;
 }
 
 /* 主按鈕 */
@@ -64,10 +69,13 @@ body {
 /* 圖表 */
 .chart-container {
   width: 100%;
-  max-width: 350px;
-  margin: 30px auto;
+  max-width: 500px;
+  height: 420px;
+  margin: 20px auto;
 }
-
+#chart {
+  max-height: 420px !important;
+}
 /* ⭐ 輸入框升級 */
 input {
   padding: 10px;
@@ -186,4 +194,189 @@ li {
   font-size: 12px;
   color: rgba(255, 255, 255, 0.4);
   margin-top: 5px;
+}
+.recommend-box h1 {
+  font-size: 42px;
+  color: #2563eb;
+  margin: 10px 0;
+}
+
+.summary-box h4 {
+  margin-top: 15px;
+  color: #2563eb;
+}
+
+.summary-box hr {
+  margin: 15px 0;
+}
+/* 推薦指數 + AI摘要並排 */
+
+.dashboard-row {
+  display: flex;
+  gap: 15px;
+  margin: 15px 0;
+}
+
+.half-card {
+  flex: 1;
+}
+
+/* 評論區固定高度 */
+
+#reviews {
+  max-height: 350px;
+  overflow-y: auto;
+  padding-right: 10px;
+}
+
+/* 電影資訊 */
+.movie-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 30px;
+  text-align: left;
+}
+.movie-poster {
+  flex-shrink: 0;
+}
+
+.movie-poster img {
+  width: 220px;
+  border-radius: 15px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+}
+
+.movie-info {
+  flex: 1;
+}
+
+.movie-card img {
+  border-radius: 12px;
+  margin: 10px 0;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+.movie-overview {
+  width: 100%;
+  margin-top: 25px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.movie-overview h3 {
+  color: #fbbf24;
+  margin-bottom: 12px;
+}
+
+.movie-overview p {
+  line-height: 1.8;
+  font-size: 15px;
+  color: rgba(255, 255, 255, 0.9);
+}
+/* 推薦區 */
+
+.recommend-box {
+  text-align: center;
+}
+
+.recommend-box h2 {
+  font-size: 36px;
+  margin: 5px 0;
+}
+
+.recommend-box h1 {
+  font-size: 50px;
+  color: #2563eb;
+  margin: 5px 0;
+}
+
+/* AI摘要 */
+
+.summary-box {
+  line-height: 1.8;
+}
+
+/* 手機版 */
+
+@media (max-width: 900px) {
+  .dashboard-row {
+    flex-direction: column;
+  }
+}
+#topPositive p,
+#topNegative p {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 10px;
+  border-radius: 10px;
+  margin-bottom: 8px;
+  line-height: 1.6;
+}
+
+#keywords {
+  list-style: none;
+  padding: 0;
+}
+
+#keywords li {
+  padding: 8px;
+  margin-bottom: 6px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+}
+.trailer-btn {
+  display: inline-block;
+  margin-top: 15px;
+  padding: 10px 18px;
+  background: #ef4444;
+  color: white;
+  text-decoration: none;
+  border-radius: 10px;
+  font-weight: bold;
+  transition: 0.3s;
+}
+
+.trailer-btn:hover {
+  background: #dc2626;
+  transform: scale(1.05);
+}
+.trailer-wrapper {
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+.trailer-wrapper iframe {
+  width: 100%;
+  height: 320px;
+  border: none;
+  border-radius: 15px;
+}
+.result-card {
+  margin: 20px 0;
+  padding: 15px;
+
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+
+  font-size: 18px;
+  font-weight: 600;
+
+  text-align: center;
+}
+.result-card {
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 18px;
+  padding: 20px;
+  margin-top: 20px;
+}
+
+#resultText {
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.chart-container {
+  width: 100%;
+  max-width: 450px;
+  margin: 0 auto;
 }

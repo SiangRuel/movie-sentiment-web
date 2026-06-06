@@ -1,20 +1,25 @@
 let chart;
 
-// ⭐ 主分析
-async function analyze() {
-  document.getElementById("result").innerText = "分析中...";
-
-  const res = await fetch("/analyze");
-  const data = await res.json();
-
-  updateUI(data);
-}
-
 
 // ⭐ 共用 UI 更新（🔥核心）
 function updateUI(data) {
-  document.getElementById("result").innerText =
-    `總評論：${data.total} ｜ 正面：${data.positive} ｜ 負面：${data.negative} ｜ 中立：${data.neutral}`;
+  const positiveRate =
+    data.total > 0
+      ? ((data.positive / data.total) * 100).toFixed(1)
+      : 0;
+
+  document.getElementById("resultText").innerHTML =
+    `
+總評論：${data.total}
+｜
+正面：${data.positive}
+｜
+負面：${data.negative}
+｜
+中立：${data.neutral}
+｜
+好評率：${positiveRate}%
+`;
 
   // ⭐ 圖表
   if (chart) chart.destroy();
@@ -47,14 +52,6 @@ function updateUI(data) {
     }
   });
 
-  // ⭐ Keywords
-  const kwList = document.getElementById("keywords");
-  kwList.innerHTML = "";
-  data.keywords.forEach(k => {
-    const li = document.createElement("li");
-    li.innerText = `${k[0]} (${k[1]})`;
-    kwList.appendChild(li);
-  });
 
   // ⭐ Reviews
   const rvList = document.getElementById("reviews");
@@ -64,6 +61,156 @@ function updateUI(data) {
     li.innerText = `${r.text} ${r.label}`;
     rvList.appendChild(li);
   });
+  // ⭐ Positive Reviews
+
+  const positiveReviews =
+    data.reviews.filter(r =>
+      r.label.includes("正面")
+    );
+
+  const topPositive =
+    document.getElementById("topPositive");
+
+  if (topPositive) {
+
+    topPositive.innerHTML =
+      positiveReviews
+        .slice(0, 5)
+        .map(r =>
+          `<p>${r.text}</p>`
+        )
+        .join("");
+
+  }// ⭐ Negative Reviews
+
+  const negativeReviews =
+    data.reviews.filter(r =>
+      r.label.includes("負面")
+    );
+
+  const topNegative =
+    document.getElementById("topNegative");
+
+  if (topNegative) {
+
+    topNegative.innerHTML =
+      negativeReviews
+        .slice(0, 5)
+        .map(r =>
+          `<p>${r.text}</p>`
+        )
+        .join("");
+
+  }
+
+
+  // ⭐ 推薦指數
+
+  let stars = "⭐";
+  let grade = "D";
+
+  if (positiveRate >= 90) {
+    stars = "⭐⭐⭐⭐⭐";
+    grade = "A+";
+  }
+  else if (positiveRate >= 80) {
+    stars = "⭐⭐⭐⭐";
+    grade = "A";
+  }
+  else if (positiveRate >= 70) {
+    stars = "⭐⭐⭐";
+    grade = "B";
+  }
+  else if (positiveRate >= 60) {
+    stars = "⭐⭐";
+    grade = "C";
+  }
+  else {
+    stars = "⭐";
+    grade = "D";
+  }
+
+  const recommendBox =
+    document.getElementById("recommendation");
+
+  if (recommendBox) {
+    recommendBox.innerHTML = `
+<div class="recommend-box">
+
+  <h2>${stars}</h2>
+
+  <h1>${grade}</h1>
+
+  <h3>好評率 ${positiveRate}%</h3>
+
+</div>
+`;
+  } const positiveReview =
+    data.reviews.find(
+      r => r.label.includes("正面")
+    );
+
+  const negativeReview =
+    data.reviews.find(
+      r => r.label.includes("負面")
+    );
+  // ⭐ AI分析摘要
+
+  let summary = "";
+
+  if (positiveRate >= 90) {
+    summary =
+      "觀眾評價極佳，整體口碑非常正面，屬於高度推薦電影。";
+  }
+  else if (positiveRate >= 80) {
+    summary =
+      "整體評價優秀，多數觀眾給予正面回饋。";
+  }
+  else if (positiveRate >= 70) {
+    summary =
+      "觀眾評價良好，但仍有部分負面意見。";
+  }
+  else if (positiveRate >= 60) {
+    summary =
+      "觀眾意見較為分歧，建議參考評論內容後再決定。";
+  }
+  else {
+    summary =
+      "整體評價偏低，負面評論比例較高。";
+  }
+
+  const summaryBox =
+    document.getElementById("movieSummary");
+
+  if (summaryBox) {
+    summaryBox.innerHTML = `
+<div class="summary-box">
+
+  <p>
+    本次分析 ${data.total} 則評論，
+    正面評論 ${data.positive} 則，
+    負面評論 ${data.negative} 則。
+  </p>
+
+  <p>${summary}</p>
+
+  <hr>
+
+  <h4>🏆 Best Review</h4>
+
+  <p>
+    ${positiveReview?.text || "N/A"}
+  </p>
+
+  <h4>⚠️ Worst Review</h4>
+
+  <p>
+    ${negativeReview?.text || "N/A"}
+  </p>
+
+</div>
+`;
+  }
 }
 
 
@@ -88,18 +235,6 @@ async function analyzeText() {
   document.getElementById("userResult").innerText = data.result;
 }
 
-
-// ⭐ 電影比較
-async function compare() {
-  document.getElementById("compareResult").innerText = "比較中...";
-
-  const res = await fetch("/compare");
-  const data = await res.json();
-
-  document.getElementById("compareResult").innerText =
-    `🎬 電影A ➜ 正面 ${data.movie1.positive} ｜ 負面 ${data.movie1.negative}
-🎬 電影B ➜ 正面 ${data.movie2.positive} ｜ 負面 ${data.movie2.negative}`;
-}
 
 
 // ⭐ AI聊天
@@ -157,20 +292,81 @@ async function crawlMovie() {
     return;
   }
 
-  document.getElementById("result").innerText = "🔄 抓取中...";
+  document.getElementById("resultText").innerHTML =
+    "🔄 Loading...";
 
   const res = await fetch("/crawl", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ keyword })
   });
-
   const data = await res.json();
 
   console.log("crawl結果：", data);
+  const trailerArea =
+    document.getElementById("trailerArea");
 
+  if (data.trailer_key) {
+    trailerArea.innerHTML = `
+    <div class="trailer-wrapper">
+      <iframe
+        src="https://www.youtube.com/embed/${data.trailer_key}"
+        title="Movie Trailer"
+        allowfullscreen>
+      </iframe>
+    </div>
+  `;
+  } else {
+    trailerArea.innerHTML = "";
+  }
+
+  if (data.poster) {
+    document.getElementById("movieInfo").innerHTML = `
+
+<div class="movie-card">
+
+  <div class="movie-poster">
+    <img
+      src="${data.poster}"
+      alt="${data.title}"
+    >
+  </div>
+
+  <div class="movie-info">
+
+    <h2>${data.title}</h2>
+
+    <p>⭐ TMDB評分：${data.rating}</p>
+
+    <p>👥 投票數：${data.vote_count}</p>
+
+    <p>🔥 熱度：${Math.round(data.popularity)}</p>
+
+    <p>🌍 語言：${data.original_language}</p>
+
+    <p>📅 上映日期：${data.release_date}</p>
+
+    <p>📝 評論數：${data.total}</p>
+
+  </div>
+
+</div>
+
+<div class="movie-overview">
+
+  <h3>📖 劇情介紹</h3>
+
+  <p>
+    ${data.overview || "暫無劇情介紹"}
+  </p>
+
+</div>
+
+`;
+  }
   if (!data.reviews || data.reviews.length === 0) {
-    document.getElementById("result").innerText = "找不到相關評論";
+    document.getElementById("resultText").innerHTML =
+      "找不到相關評論";
     return;
   }
 

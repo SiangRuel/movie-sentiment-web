@@ -3,65 +3,18 @@ import json
 from collections import Counter
 import re
 from transformers import pipeline
+from dotenv import load_dotenv
+import os
 
 app = Flask(__name__)
+load_dotenv()
 
-with open("reviews.json", encoding="utf-8") as f:
-    reviews = json.load(f)
+TMDB_API_KEY = os.getenv("TMDB_API_KEY")
+print("TMDB KEY OK:", TMDB_API_KEY[:5])
 
-positive_words = [
-    "good",
-    "great",
-    "amazing",
-    "love",
-    "excellent",
-    "好",
-    "喜歡",
-    "精彩",
-    "優秀",
-    "棒",
-]
 
-negative_words = [
-    "bad",
-    "terrible",
-    "boring",
-    "hate",
-    "worst",
-    "差",
-    "爛",
-    "無聊",
-    "討厭",
-    "糟",
-    "不好",
-    "奇怪",
-    "垃圾",
-    "爛掉",
-    "膩",
-    "失利",
-    "不看",
-    "不敢看",
-    "傻眼",
-    "看不下去",
-    "雷",
-    "很爛",
-    "崩",
-    "失望",
-    "糟糕",
-    "無言",
-    "中猴",
-    "不正常",
-    "不喜歡",
-    "不對",
-    "不行",
-]
 
-from transformers import pipeline
-
-classifier = pipeline(
-    "sentiment-analysis",
-    model="uer/roberta-base-finetuned-jd-binary-chinese"
-)
+classifier = pipeline("sentiment-analysis")
 
 
 # ⭐ 情感分析（含中立）
@@ -99,10 +52,7 @@ def get_keywords(data):
 
     for r in data:
 
-        ws = re.findall(
-            r"[\u4e00-\u9fff]{2,}",
-            r
-        )
+        ws = re.findall(r"[\u4e00-\u9fff]{2,}", r)
 
         for w in ws:
 
@@ -113,39 +63,12 @@ def get_keywords(data):
 
     return Counter(words).most_common(10)
 
+
 @app.route("/")
 def home():
     return render_template("index.html")
 
 
-# ⭐ 主分析（含中立）
-@app.route("/analyze")
-def analyze():
-    preds = [analyze_sentiment_rule(r) for r in reviews]
-
-    pos = preds.count(1)
-    neg = preds.count(0)
-    neu = preds.count(-1)
-    total = len(preds)
-
-    return jsonify(
-        {
-            "positive": pos,
-            "negative": neg,
-            "neutral": neu,  # ⭐ 新增
-            "total": total,
-            "keywords": get_keywords(reviews),
-            "reviews": [
-                {
-                    "text": r,
-                    "label": (
-                        "🟢 正面" if p == 1 else "🔴 負面" if p == 0 else "⚪ 中立"
-                    ),
-                }
-                for r, p in zip(reviews[:50], preds[:50])
-            ],
-        }
-    )
 
 
 # ⭐ 使用者輸入分析（修正中立）
@@ -164,118 +87,93 @@ def analyze_text():
     return jsonify({"result": label})
 
 
-# ⭐ 比較（修正錯誤‼️）
-@app.route("/compare")
-def compare():
-    other_reviews = reviews[::-1]
 
-    def calc(data):
-        preds = [analyze_sentiment_rule(r) for r in data]
-        return {
-            "positive": preds.count(1),
-            "negative": preds.count(0),
-            "neutral": preds.count(-1),
-        }
-
-    return jsonify(
-        {
-            "movie1": calc(reviews),
-            "movie2": calc(other_reviews),
-        }
-    )
 
 
 @app.route("/crawl", methods=["POST"])
 def crawl_movie():
-    keyword = request.json.get("keyword", "")
 
     import requests
-    from bs4 import BeautifulSoup
 
-    url = f"https://www.ptt.cc/bbs/movie/search?q={keyword}"
+    keyword = request.json.get("keyword", "")
 
-    headers = {
-        "User-Agent": (
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-            "AppleWebKit/537.36 (KHTML, like Gecko) "
-            "Chrome/137.0.0.0 Safari/537.36"
-        )
-    }
-
-    cookies = {
-        "over18": "1"
-    }
-
-    res = requests.get(
-        url,
-        headers=headers,
-        cookies=cookies,
-        timeout=15
+    search_res = requests.get(
+        "https://api.themoviedb.org/3/search/movie",
+        params={"api_key": TMDB_API_KEY, "query": keyword, "language": "zh-TW"},
     )
 
-    soup = BeautifulSoup(res.text, "html.parser")
+    movies = search_res.json().get("results", [])
 
-    posts = soup.select(".title a")
-
-    comments = []
-
-    for p in posts[:20]:
-        title = p.text
-
-        # ⭐ 關鍵：篩選電影名稱
-        post_url = "https://www.ptt.cc" + p["href"]
-        print("文章標題：", title)
-        print("文章網址：", post_url)
-
-        post_res = requests.get(
-            post_url,
-            headers=headers,
-            timeout=15
+    if not movies:
+        return jsonify(
+            {
+                "total": 0,
+                "positive": 0,
+                "negative": 0,
+                "neutral": 0,
+                "keywords": [],
+                "reviews": [],
+            }
         )
 
-        post_soup = BeautifulSoup(
-            post_res.text,
-            "html.parser"
-        )
+    movie = movies[0]
+    movie_id = movie["id"]
+    video_res = requests.get(
+        f"https://api.themoviedb.org/3/movie/{movie_id}/videos",
+        params={"api_key": TMDB_API_KEY},
+    )
 
-        pushes = post_soup.select(".push")
+    videos = video_res.json().get("results", [])
 
-        for push in pushes:
+    trailer_key = ""
 
-            content = push.select_one(".push-content")
+    for v in videos:
 
-            if content:
-                text = content.get_text() \
-                            .replace(":", "") \
-                            .strip()
+        if v.get("site") == "YouTube" and v.get("type") == "Trailer":
+            trailer_key = v.get("key")
+            break
 
-                if len(text) > 5:
-                    comments.append(text)
-    comments = comments[:50]                
-    preds = [analyze_sentiment_rule(r) for r in comments]
+    review_res = requests.get(
+        f"https://api.themoviedb.org/3/movie/{movie_id}/reviews",
+        params={"api_key": TMDB_API_KEY},
+    )
+
+    review_data_raw = review_res.json().get("results", [])
+
+    comments = [r.get("content", "") for r in review_data_raw if r.get("content")]
+
+    comments = comments[:20]
+
+    preds = [analyze_sentiment_rule(c) for c in comments]
 
     review_data = [
-        {
-            "text": r,
-            "label": (
-                "🟢 正面" if p == 1
-                else "🔴 負面" if p == 0
-                else "⚪ 中立"
-            )
-        }
+        {"text": r[:300], "label": ("🟢 正面" if p == 1 else "🔴 負面")}
         for r, p in zip(comments, preds)
     ]
 
-    print("抓到留言數：", len(comments))
-
-    return jsonify({
-        "total": len(comments),
-        "positive": preds.count(1),
-        "negative": preds.count(0),
-        "neutral": preds.count(-1),
-        "keywords": get_keywords(comments),
-        "reviews": review_data[:50]
-    })
+    return jsonify(
+        {
+            "title": movie.get("title"),
+            "trailer_key": trailer_key,
+            "rating": movie.get("vote_average"),
+            "vote_count": movie.get("vote_count"),
+            "popularity": movie.get("popularity"),
+            "original_language": movie.get("original_language"),
+            "release_date": movie.get("release_date"),
+            "overview": movie.get("overview"),
+            "poster": (
+                "https://image.tmdb.org/t/p/w500" + movie["poster_path"]
+                if movie.get("poster_path")
+                else ""
+            ),
+            "total": len(comments),
+            "positive": preds.count(1),
+            "negative": preds.count(0),
+            "neutral": 0,
+            "keywords": get_keywords(comments),
+            "reviews": review_data,
+        }
+    )
 
 
 @app.route("/analyze_text_batch", methods=["POST"])
@@ -294,4 +192,4 @@ def analyze_text_batch():
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True, use_reloader=True)

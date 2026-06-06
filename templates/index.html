@@ -1,7 +1,9 @@
 <!doctype html>
 <html>
   <head>
-    <title>電影情感分析系統</title>
+    <meta charset="utf-8" />
+    <title>Movie Sentiment Analysis System</title>
+
     <link rel="stylesheet" href="/static/style.css" />
   </head>
 
@@ -9,68 +11,73 @@
     <div class="main-layout">
       <!-- 左側 -->
       <div class="left-panel">
-        <h1>🎬 電影評論情感分析</h1>
+        <h1>🎬 AI Movie Sentiment Analysis System</h1>
 
-        <button onclick="analyze()" class="main-btn">📊 分析全部評論</button>
+        <div id="trailerArea"></div>
 
-        <h2 id="result"></h2>
+        <div id="result" class="result-card">
+          <div id="resultText"></div>
 
-        <div class="chart-container">
-          <canvas id="chart"></canvas>
+          <div class="chart-container">
+            <canvas id="chart"></canvas>
+          </div>
         </div>
       </div>
 
       <!-- 右側 -->
       <div class="right-panel">
-        <!-- 🎬 選擇電影 -->
+        <!-- 電影資訊 -->
         <div class="card">
-          <h3>🎬 選擇電影分析</h3>
-          <input id="movieInput" placeholder="輸入電影名稱..." />
-          <button onclick="crawlMovie()">抓取評論</button>
+          <h3>🎬 Movie Search / 電影搜尋</h3>
+
+          <div class="search-row">
+            <input
+              id="movieInput"
+              placeholder="Enter movie title... / 輸入電影名稱"
+            />
+            <button onclick="crawlMovie()">Search / 搜尋</button>
+          </div>
+
+          <div id="movieInfo"></div>
         </div>
 
-        <!-- 🔥 關鍵字 -->
-        <div class="card">
-          <h3>🔥 熱門關鍵字</h3>
-          <ul id="keywords"></ul>
+        <!-- 推薦 + AI摘要 -->
+        <div class="dashboard-row">
+          <div class="card half-card">
+            <h3>⭐ Recommendation Score / 推薦指數</h3>
+
+            <div id="recommendation"></div>
+          </div>
+
+          <div class="card half-card">
+            <h3>🧠 AI Summary / AI分析摘要</h3>
+
+            <div id="movieSummary"></div>
+          </div>
         </div>
 
         <!-- 📝 評論 -->
         <div class="card">
-          <h3>📝 評論內容</h3>
+          <h3>📝 All Reviews / 全部評論</h3>
           <ul id="reviews"></ul>
         </div>
 
-        <!-- ⚔️ 比較 -->
-        <div class="card">
-          <h3>⚔️ 電影比較</h3>
-          <button onclick="compare()">比較兩部電影</button>
-          <p id="compareResult"></p>
-        </div>
+        <div class="dashboard-row">
+          <div class="card half-card">
+            <h3>😊 Top Positive Reviews / 最佳好評</h3>
+            <div id="topPositive"></div>
+          </div>
 
-        <!-- ✏️ 單句分析 -->
-        <div class="card">
-          <h3>✏️ 輸入評論分析</h3>
-          <input id="userText" placeholder="輸入評論..." />
-          <button onclick="analyzeText()">分析</button>
-          <p id="userResult"></p>
-        </div>
-
-        <!-- 🤖 AI 區 -->
-        <div class="card ai-card">
-          <h3>🤖 AI 情感分析助手</h3>
-
-          <div id="aiBox" class="ai-box"></div>
-
-          <div class="ai-input">
-            <input id="aiInput" placeholder="輸入一句評論..." />
-            <button onclick="askAI()">送出</button>
+          <div class="card half-card">
+            <h3>😡 Top Negative Reviews / 最佳負評</h3>
+            <div id="topNegative"></div>
           </div>
         </div>
       </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
     <script src="/static/script.js"></script>
   </body>
 </html>
