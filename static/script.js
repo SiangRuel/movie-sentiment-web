@@ -8,10 +8,15 @@ let chart;
 
 // ⭐ 共用 UI 更新（🔥核心）
 function updateUI(data) {
+  const positiveCount =
+    (data.very_positive || 0) +
+    (data.positive || 0);
+
   const positiveRate =
     data.analyzed_reviews > 0
       ? (
-        (data.positive / data.analyzed_reviews) *
+        (positiveCount /
+          data.analyzed_reviews) *
         100
       ).toFixed(1)
       : 0;
@@ -27,13 +32,28 @@ function updateUI(data) {
   <div class="stat-label">分析評論數</div>
 </div>
 <div class="stat-box">
+  <div class="stat-value">${data.very_positive}</div>
+  <div class="stat-label">非常正面</div>
+</div>
+
+<div class="stat-box">
   <div class="stat-value">${data.positive}</div>
-  <div class="stat-label">正面評論</div>
+  <div class="stat-label">偏正面</div>
+</div>
+
+<div class="stat-box">
+  <div class="stat-value">${data.neutral}</div>
+  <div class="stat-label">中立</div>
 </div>
 
 <div class="stat-box">
   <div class="stat-value">${data.negative}</div>
-  <div class="stat-label">負面評論</div>
+  <div class="stat-label">偏負面</div>
+</div>
+
+<div class="stat-box">
+  <div class="stat-value">${data.very_negative}</div>
+  <div class="stat-label">非常負面</div>
 </div>
 
 
@@ -47,13 +67,27 @@ function updateUI(data) {
   chart = new Chart(document.getElementById("chart"), {
     type: 'pie',
     data: {
-      labels: ["正面", "負面", "中立"],
+      labels: [
+        "非常正面",
+        "偏正面",
+        "中立",
+        "偏負面",
+        "非常負面"
+      ],
       datasets: [{
-        data: [data.positive, data.negative, data.neutral],
+        data: [
+          data.very_positive,
+          data.positive,
+          data.neutral,
+          data.negative,
+          data.very_negative
+        ],
         backgroundColor: [
-          "#4ade80",
-          "#fb7185",
-          "#cbd5e1"
+          "#16a34a", // 非常正面
+          "#4ade80", // 偏正面
+          "#cbd5e1", // 中立
+          "#fb7185", // 偏負面
+          "#dc2626"  // 非常負面
         ]
       }]
     },
@@ -97,43 +131,76 @@ function updateUI(data) {
   rvList.innerHTML = "";
   data.reviews.forEach(r => {
     const li = document.createElement("li");
+
     li.innerHTML = `
-${r.text}
+    <div class="review-label">
+      ${r.label}
+    </div>
 
-<span class="${r.label.includes("正面")
-        ? "positive-tag"
-        : "negative-tag"
-      }">
-  <i class="${r.label.includes("正面")
-        ? "fa-solid fa-thumbs-up"
-        : "fa-solid fa-thumbs-down"
-      }"></i>
+    <div>
+      ${r.text}
+    </div>
+  `;
 
-  ${r.label}
-</span>
-`;
     rvList.appendChild(li);
   });
   // ⭐ Positive Reviews
-
-  const positiveReviews =
-    data.reviews.filter(r =>
-      r.label.includes("正面")
-    );
 
   const topPositive =
     document.getElementById("topPositive");
 
   if (topPositive) {
 
-    topPositive.innerHTML =
-      positiveReviews
-        .slice(0, 5)
-        .map(r =>
-          `<p>${r.text}</p>`
-        )
-        .join("");
+    topPositive.innerHTML = `
+    <div class="review-card">
+      
 
+      ${data.five_star_reviews?.length
+        ? data.five_star_reviews
+          .map(
+            (r, i) => `
+      <div class="review-item">
+
+        <div
+          class="review-label"
+          style="color:#facc15;"
+        >
+          ${r.label}
+        </div>
+
+        <div
+  id="pos-${i}"
+  class="review-text collapsed"
+>
+  ${r.text}
+</div>
+
+${r.text.length > 300
+                ? `
+      <a
+        href="#"
+        onclick="
+          toggleReview(
+            'pos-${i}',
+            this
+          );
+          return false;
+        "
+      >
+        展開
+      </a>
+    `
+                : ""
+              }
+
+      </div>
+    `
+          )
+          .join("")
+        : "尚無資料"
+      }
+    </div>
+  `;
   }// ⭐ Negative Reviews
 
   const negativeReviews =
@@ -146,14 +213,56 @@ ${r.text}
 
   if (topNegative) {
 
-    topNegative.innerHTML =
-      negativeReviews
-        .slice(0, 5)
-        .map(r =>
-          `<p>${r.text}</p>`
-        )
-        .join("");
+    topNegative.innerHTML = `
+    <div class="review-card">
+     
+      ${data.one_star_reviews?.length
+        ? data.one_star_reviews
+          .map(
+            (r, i) => `
+      <div class="review-item">
 
+        <div
+          class="review-label"
+          style="color:#facc15;"
+        >
+          ${r.label}
+        </div>
+
+        <div
+  id="neg-${i}"
+  class="review-text collapsed"
+>
+  ${r.text}
+</div>
+
+${r.text.length > 300
+                ? `
+      <a
+        href="#"
+        onclick="
+          toggleReview(
+            'neg-${i}',
+            this
+          );
+          return false;
+        "
+      >
+        展開
+      </a>
+    `
+                : ""
+              }
+        </div>
+
+      </div>
+    `
+          )
+          .join("")
+        : "尚無資料"
+      }
+    </div>
+  `;
   }
 
 
@@ -201,64 +310,33 @@ ${r.text}
       r => r.label.includes("負面")
     );
   // ⭐ AI分析摘要
-
-  let summary = "";
-
-  if (positiveRate >= 90) {
-    summary =
-      "觀眾評價極佳，整體口碑非常正面，屬於高度推薦電影。";
-  }
-  else if (positiveRate >= 80) {
-    summary =
-      "整體評價優秀，多數觀眾給予正面回饋。";
-  }
-  else if (positiveRate >= 70) {
-    summary =
-      "觀眾評價良好，但仍有部分負面意見。";
-  }
-  else if (positiveRate >= 60) {
-    summary =
-      "觀眾意見較為分歧，建議參考評論內容後再決定。";
-  }
-  else {
-    summary =
-      "整體評價偏低，負面評論比例較高。";
-  }
-
   const summaryBox =
     document.getElementById("movieSummary");
 
   if (summaryBox) {
+
+    let summary =
+      data.ai_summary || "";
+
+    summary = summary.replace(
+      /^\s*觀眾喜歡/m,
+      '<i class="fa-solid fa-thumbs-up"></i>觀眾喜歡'
+    );
+
+    summary = summary.replace(
+      /^\s*觀眾不喜歡/m,
+      '<i class="fa-solid fa-thumbs-down"></i>觀眾不喜歡'
+    );
+
+    summary = summary.replace(
+      /^\s*整體評價/m,
+      '<i class="fa-solid fa-star"></i>整體評價'
+    );
     summaryBox.innerHTML = `
 <div class="summary-box">
-
-  <p>
-    本次分析 ${data.analyzed_reviews} 則評論，
-    正面評論 ${data.positive} 則，
-    負面評論 ${data.negative} 則。
-  </p>
-
-  <p>${summary}</p>
-
-  <hr>
-
-  <h4>
-  <i class="fa-solid fa-trophy"></i>
-  Best Review
-</h4>
-
-  <p>
-    ${positiveReview?.text || "N/A"}
-  </p>
-
-  <h4>
-  <i class="fa-solid fa-circle-exclamation"></i>
-  Worst Review
-</h4>
-  <p>
-    ${negativeReview?.text || "N/A"}
-  </p>
-
+  <div class="summary-content">
+    ${summary}
+  </div>
 </div>
 `;
   }
@@ -645,5 +723,41 @@ function logout() {
 
   window.location.href =
     "/login";
+
+}
+function toggleReview(id, btn) {
+
+  const el =
+    document.getElementById(id);
+
+  if (
+    el.classList.contains(
+      "collapsed"
+    )
+  ) {
+
+    el.classList.remove(
+      "collapsed"
+    );
+
+    el.classList.add(
+      "expanded"
+    );
+
+    btn.innerText = "收起";
+
+  } else {
+
+    el.classList.remove(
+      "expanded"
+    );
+
+    el.classList.add(
+      "collapsed"
+    );
+
+    btn.innerText = "展開";
+
+  }
 
 }

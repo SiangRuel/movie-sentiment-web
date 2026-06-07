@@ -248,7 +248,7 @@ li {
 /* 評論區固定高度 */
 
 #reviews {
-  max-height: 350px;
+  max-height: 500px;
   overflow-y: auto;
   padding-right: 10px;
 }
@@ -454,12 +454,19 @@ li {
   color: #ef4444;
   font-weight: bold;
 }
-
 .movie-info i,
-.movie-overview i,
-.summary-box i {
+.movie-overview i {
   width: 20px;
   margin-right: 6px;
+}
+.summary-box i {
+  width: auto;
+  margin-right: 6px;
+  display: inline;
+}
+.summary-content {
+  white-space: pre-line;
+  line-height: 1.8;
 }
 /* TMDB評分 */
 .fa-star {
@@ -547,7 +554,6 @@ li {
   color: rgba(255, 255, 255, 0.7);
 }
 .loading-box {
-
   position: fixed;
 
   top: 0;
@@ -895,4 +901,27 @@ li {
   font-size: 13px;
 
   color: white;
+}
+.review-label {
+  color: #facc15;
+  font-weight: bold;
+}
+.review-text.collapsed {
+  max-height: 140px;
+  overflow: hidden;
+}
+
+.review-text.expanded {
+  max-height: none;
+}
+/* 最佳好評 */
+#topPositive {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+/* 最佳負評 */
+#topNegative {
+  max-height: 400px;
+  overflow-y: auto;
 }

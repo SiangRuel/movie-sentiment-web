@@ -4,28 +4,20 @@ from collections import Counter
 import re
 from transformers import pipeline
 from dotenv import load_dotenv
+from openai import OpenAI
 import os
 
 app = Flask(__name__)
 load_dotenv()
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
+client = OpenAI(api_key=OPENAI_API_KEY)
 TMDB_API_KEY = os.getenv("TMDB_API_KEY")
 print("TMDB KEY OK:", TMDB_API_KEY[:5])
 
 
-classifier = pipeline("sentiment-analysis")
-
-
-# ⭐ 情感分析（含中立）
-def analyze_sentiment_rule(text):
-    result = classifier(text[:512])[0]
-
-    label = result["label"].lower()
-
-    if "positive" in label:
-        return 1
-    else:
-        return 0
+# 不用了
+# classifier = pipeline("sentiment-analysis")
 
 
 # ⭐ 關鍵字（支援中文）
@@ -63,6 +55,169 @@ def get_keywords(data):
     return Counter(words).most_common(10)
 
 
+def analyze_sentiment_gpt(text):
+
+    try:
+
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {
+                    "role": "system",
+                    "content": """
+你是專業電影評論分析師。
+
+請判斷評論情緒。
+
+只能回答：
+
+2 = 非常正面
+1 = 偏正面
+0 = 中立
+-1 = 偏負面
+-2 = 非常負面
+
+請考慮：
+
+- 反諷
+- 諷刺
+- 混合評價
+- 長篇評論
+- 客觀分析
+
+只回答數字。
+""",
+                },
+                {"role": "user", "content": text[:2000]},
+            ],
+        )
+
+        result = response.choices[0].message.content.strip()
+
+        try:
+            return int(result)
+        except:
+            return 0
+
+    except Exception as e:
+
+        print("Sentiment Error:", e)
+
+        return 0
+
+
+def analyze_reviews_batch(movie_title, reviews):
+
+    if not reviews:
+        return None
+
+    try:
+
+        prompt = f"""
+你是一位專業電影評論分析師。
+
+電影名稱：
+
+{movie_title}
+
+以下是觀眾評論：
+
+{chr(10).join(reviews[:50])}
+
+請用 JSON 回答：
+
+{{
+    "very_positive": 數量,
+    "positive": 數量,
+    "neutral": 數量,
+    "negative": 數量,
+    "very_negative": 數量,
+
+    "best_positive_review": "最具代表性的好評",
+
+    "best_negative_review": "最具代表性的負評"
+}}
+
+不要解釋。
+只回傳 JSON。
+"""
+
+        response = client.chat.completions.create(
+            model="gpt-4o-mini", messages=[{"role": "user", "content": prompt}]
+        )
+
+        content = response.choices[0].message.content
+
+        content = content.replace("```json", "").replace("```", "").strip()
+
+        return json.loads(content)
+
+    except Exception as e:
+
+        print("Batch Analysis Error:", e)
+
+        return None
+
+
+def generate_ai_summary(movie_title, reviews):
+
+    if not reviews:
+        return "No reviews available."
+
+    sample_reviews = reviews[:20]
+
+    try:
+
+        prompt = f"""
+你是一位電影評論分析師。
+
+電影名稱：
+
+{movie_title}
+
+請根據以下電影評論內容進行分析。
+
+請使用繁體中文回答。
+
+回答時請統一使用：
+
+《{movie_title}》
+
+不要自行翻譯電影名稱。
+不要使用英文名稱。
+不要創造新的中文譯名。
+
+輸出格式：
+觀眾喜歡
+1.
+2.
+3.
+
+觀眾不喜歡
+1.
+2.
+3.
+
+整體評價
+用100字內總結電影口碑。
+評論：
+
+{chr(10).join(sample_reviews)}
+"""
+
+        response = client.chat.completions.create(
+            model="gpt-4o-mini", messages=[{"role": "user", "content": prompt}]
+        )
+
+        return response.choices[0].message.content
+
+    except Exception as e:
+
+        print("AI Summary Error:", e)
+
+        return "AI summary unavailable."
+
+
 @app.route("/login")
 def login():
     return render_template("login.html")
@@ -81,15 +236,24 @@ def dashboard():
 # ⭐ 使用者輸入分析（修正中立）
 @app.route("/analyze_text", methods=["POST"])
 def analyze_text():
-    text = request.json.get("text", "")
-    result = analyze_sentiment_rule(text)
 
-    if result == 1:
-        label = "🟢 正面"
+    text = request.json.get("text", "")
+    result = analyze_sentiment_gpt(text)
+
+    if result == 2:
+        label = "⭐⭐⭐⭐⭐ 非常正面"
+
+    elif result == 1:
+        label = "⭐⭐⭐⭐ 偏正面"
+
     elif result == 0:
-        label = "🔴 負面"
+        label = "⭐⭐⭐ 中立"
+
+    elif result == -1:
+        label = "⭐⭐ 偏負面"
+
     else:
-        label = "⚪ 中立"
+        label = "⭐ 非常負面"
 
     return jsonify({"result": label})
 
@@ -193,13 +357,79 @@ def crawl_movie():
             if content:
                 comments.append(content)
     print(f"TMDB總評論: {total_reviews} | " f"實際分析: {len(comments)}")
-    preds = [analyze_sentiment_rule(c) for c in comments]
+    movie_name = movie.get("title") or movie.get("original_title")
 
-    review_data = [
-        {"text": r[:300], "label": ("正面" if p == 1 else "負面")}
-        for r, p in zip(comments, preds)
-    ]
+    preds = [analyze_sentiment_gpt(c) for c in comments]
 
+    ai_summary = generate_ai_summary(movie_name, comments)
+
+    very_positive = preds.count(2)
+    positive = preds.count(1)
+    neutral = preds.count(0)
+    negative = preds.count(-1)
+    very_negative = preds.count(-2)
+    five_star_reviews = []
+    positive_label = "尚無資料"
+
+    for r, p in zip(comments, preds):
+
+        if p == 2:
+            five_star_reviews.append({"text": r, "label": "★★★★★"})
+
+    if five_star_reviews:
+        positive_label = "★★★★★"
+
+    if not five_star_reviews:
+
+        for r, p in zip(comments, preds):
+
+            if p == 1:
+                five_star_reviews.append({"text": r, "label": "★★★★☆"})
+
+        if five_star_reviews:
+            positive_label = "★★★★☆"
+
+    one_star_reviews = []
+    negative_label = "尚無資料"
+
+    for r, p in zip(comments, preds):
+
+        if p == -2:
+            one_star_reviews.append({"text": r, "label": "★☆☆☆☆"})
+
+    if one_star_reviews:
+        negative_label = "★☆☆☆☆"
+
+    if not one_star_reviews:
+
+        for r, p in zip(comments, preds):
+
+            if p == -1:
+                one_star_reviews.append({"text": r, "label": "★★☆☆☆"})
+
+        if one_star_reviews:
+            negative_label = "★★☆☆☆"
+
+    review_data = []
+
+    for r, p in zip(comments, preds):
+
+        if p == 2:
+            label = "★★★★★"
+
+        elif p == 1:
+            label = "★★★★☆"
+
+        elif p == 0:
+            label = "★★★☆☆"
+
+        elif p == -1:
+            label = "★★☆☆☆"
+
+        else:
+            label = "★☆☆☆☆"
+
+        review_data.append({"text": r, "label": label})
     return jsonify(
         {
             "title": movie.get("title"),
@@ -218,26 +448,16 @@ def crawl_movie():
             ),
             "tmdb_total_reviews": total_reviews,
             "analyzed_reviews": len(comments),
-            "positive": preds.count(1),
-            "negative": preds.count(0),
-            "neutral": 0,
+            "very_positive": very_positive,
+            "positive": positive,
+            "neutral": neutral,
+            "negative": negative,
+            "very_negative": very_negative,
+            "five_star_reviews": five_star_reviews,
+            "one_star_reviews": one_star_reviews,
             "keywords": get_keywords(comments),
             "reviews": review_data,
-        }
-    )
-
-
-@app.route("/analyze_text_batch", methods=["POST"])
-def analyze_text_batch():
-    data = request.json.get("reviews", [])
-
-    preds = [analyze_sentiment_rule(r) for r in data]
-
-    return jsonify(
-        {
-            "positive": preds.count(1),
-            "negative": preds.count(0),
-            "neutral": preds.count(-1),
+            "ai_summary": ai_summary,
         }
     )
 
