@@ -127,38 +127,65 @@ function updateUI(data) {
 
 
   // ⭐ Reviews
-  const rvList = document.getElementById("reviews");
-  rvList.innerHTML = "";
-  data.reviews.forEach(r => {
-    const li = document.createElement("li");
+const rvList =
+  document.getElementById("reviews");
 
-    li.innerHTML = `
+rvList.innerHTML = "";
+
+data.reviews.forEach((r, i) => {
+
+  const li =
+    document.createElement("li");
+
+  li.innerHTML = `
+
     <div class="review-label">
       ${r.label}
     </div>
 
-    <div>
+    <div
+      id="review-${i}"
+      data-original="${encodeURIComponent(r.text)}"
+    >
       ${r.text}
     </div>
+
+    <a
+      href="#"
+      onclick="
+        toggleTranslate(
+          'review-${i}',
+          this
+        );
+        return false;
+      "
+    >
+      翻譯年糕
+    </a>
+
   `;
 
-    rvList.appendChild(li);
-  });
-  // ⭐ Positive Reviews
+  rvList.appendChild(li);
 
-  const topPositive =
-    document.getElementById("topPositive");
+});
 
-  if (topPositive) {
 
-    topPositive.innerHTML = `
+
+
+// ⭐ Positive Reviews
+
+const topPositive =
+  document.getElementById("topPositive");
+
+if (topPositive) {
+
+  topPositive.innerHTML = `
     <div class="review-card">
-      
 
       ${data.five_star_reviews?.length
         ? data.five_star_reviews
-          .map(
-            (r, i) => `
+            .map(
+              (r, i) => `
       <div class="review-item">
 
         <div
@@ -169,75 +196,92 @@ function updateUI(data) {
         </div>
 
         <div
-  id="pos-${i}"
-  class="review-text collapsed"
->
-  ${r.text}
-</div>
+          id="pos-${i}"
+          class="review-text collapsed"
+          data-original="${encodeURIComponent(r.text)}"
+        >
+          ${r.text}
+        </div>
 
-${r.text.length > 300
-                ? `
-      <a
-        href="#"
-        onclick="
-          toggleReview(
-            'pos-${i}',
-            this
-          );
-          return false;
-        "
-      >
-        展開
-      </a>
-    `
-                : ""
-              }
+        ${r.text.length > 300
+          ? `
+          <a
+            href="#"
+            onclick="
+              toggleReview(
+                'pos-${i}',
+                this
+              );
+              return false;
+            "
+          >
+            展開
+          </a>
+          `
+          : ""
+        }
+
+        &nbsp;
+
+        <a
+          href="#"
+          onclick="
+            toggleTranslate(
+              'pos-${i}',
+              this
+            );
+            return false;
+          "
+        >
+          翻譯年糕
+        </a>
 
       </div>
-    `
-          )
-          .join("")
+      `
+            )
+            .join("")
         : "尚無資料"
       }
+
     </div>
   `;
-  }// ⭐ Negative Reviews
+}
 
-  const negativeReviews =
-    data.reviews.filter(r =>
-      r.label.includes("負面")
-    );
+// ⭐ Negative Reviews
 
-  const topNegative =
-    document.getElementById("topNegative");
 
-  if (topNegative) {
 
-    topNegative.innerHTML = `
-    <div class="review-card">
-     
-      ${data.one_star_reviews?.length
-        ? data.one_star_reviews
-          .map(
-            (r, i) => `
-      <div class="review-item">
+const topNegative =
+document.getElementById("topNegative");
 
-        <div
-          class="review-label"
-          style="color:#facc15;"
-        >
-          ${r.label}
-        </div>
+if (topNegative) {
 
-        <div
-  id="neg-${i}"
-  class="review-text collapsed"
->
-  ${r.text}
-</div>
+topNegative.innerHTML = ` <div class="review-card">
 
-${r.text.length > 300
-                ? `
+
+  ${data.one_star_reviews?.length
+    ? data.one_star_reviews
+        .map(
+          (r, i) => `
+  <div class="review-item">
+
+    <div
+      class="review-label"
+      style="color:#facc15;"
+    >
+      ${r.label}
+    </div>
+
+    <div
+      id="neg-${i}"
+      class="review-text collapsed"
+      data-original="${encodeURIComponent(r.text)}"
+    >
+      ${r.text}
+    </div>
+
+    ${r.text.length > 300
+      ? `
       <a
         href="#"
         onclick="
@@ -250,20 +294,38 @@ ${r.text.length > 300
       >
         展開
       </a>
-    `
-                : ""
-              }
-        </div>
+      `
+      : ""
+    }
 
-      </div>
-    `
-          )
-          .join("")
-        : "尚無資料"
-      }
-    </div>
-  `;
+    &nbsp;
+
+    <a
+      href="#"
+      onclick="
+        toggleTranslate(
+          'neg-${i}',
+          this
+        );
+        return false;
+      "
+    >
+      翻譯年糕
+    </a>
+
+  </div>
+  `
+        )
+        .join("")
+    : "尚無資料"
   }
+
+</div>
+
+
+`;
+}
+
 
 
   // ⭐ 推薦指數
@@ -760,4 +822,74 @@ function toggleReview(id, btn) {
 
   }
 
+}
+
+async function toggleTranslate(
+  reviewId,
+  btn
+) {
+
+  const review =
+    document.getElementById(reviewId);
+
+  const original =
+    decodeURIComponent(
+      review.dataset.original
+    );
+
+  // 已經翻譯過
+  if (review.dataset.translated) {
+
+    if (
+      btn.innerText === "顯示原文"
+    ) {
+
+      review.innerHTML =
+        original;
+
+      btn.innerText =
+        "翻譯年糕";
+
+    } else {
+
+      review.innerHTML =
+        review.dataset.translated;
+
+      btn.innerText =
+        "顯示原文";
+
+    }
+
+    return;
+  }
+
+  btn.innerText =
+    "翻譯中...";
+
+  const res = await fetch(
+    "/translate",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type":
+          "application/json"
+      },
+      body: JSON.stringify({
+        text: original
+      })
+    }
+  );
+
+  const data =
+    await res.json();
+
+  // 存起來
+  review.dataset.translated =
+    data.translation;
+
+  review.innerHTML =
+    data.translation;
+
+  btn.innerText =
+    "顯示原文";
 }

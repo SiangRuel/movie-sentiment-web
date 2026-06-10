@@ -56,6 +56,7 @@ def get_keywords(data):
 
 
 def analyze_sentiment_gpt(text):
+    
 
     try:
 
@@ -88,7 +89,7 @@ def analyze_sentiment_gpt(text):
 只回答數字。
 """,
                 },
-                {"role": "user", "content": text[:2000]},
+                {"role": "user", "content": text},
             ],
         )
 
@@ -257,6 +258,44 @@ def analyze_text():
 
     return jsonify({"result": label})
 
+@app.route("/translate", methods=["POST"])
+def translate():
+
+    text = request.json.get("text", "")
+
+    try:
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+{
+    "role": "system",
+    "content": """
+請將電影評論翻譯成繁體中文。
+
+要求：
+- 保留原本情緒語氣
+- 保留電影專有名詞
+- 電影名稱使用台灣常見譯名
+- 人名不要亂翻
+- 影評術語請自然翻譯
+- 不要額外解釋
+- 只輸出翻譯結果
+"""
+},
+                {
+                    "role": "user",
+                    "content": text
+                }
+            ]
+        )
+
+        result = response.choices[0].message.content
+
+        return jsonify({"translation": result})
+
+    except Exception as e:
+        print("Translate Error:", e)
+        return jsonify({"translation": "翻譯失敗"})
 
 @app.route("/crawl", methods=["POST"])
 def crawl_movie():
