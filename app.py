@@ -325,6 +325,19 @@ def crawl_movie():
 
     movie = movies[0]
     movie_id = movie["id"]
+    language_map = {
+    "en": "英文",
+    "ko": "韓文",
+    "ja": "日文",
+    "zh": "中文"
+    }
+
+    language = movie.get("original_language", "")
+
+    language_name = language_map.get(
+        language,
+        language
+    )
     # =====================
 
     # 主要演員
@@ -477,7 +490,7 @@ def crawl_movie():
             "rating": movie.get("vote_average"),
             "vote_count": movie.get("vote_count"),
             "popularity": movie.get("popularity"),
-            "original_language": movie.get("original_language"),
+            "original_language": language_name,
             "release_date": movie.get("release_date"),
             "overview": movie.get("overview"),
             "poster": (
