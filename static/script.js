@@ -28,8 +28,8 @@ function updateUI(data) {
   <div class="stat-label">TMDB評論數</div>
 </div>
 <div class="stat-box">
-  <div class="stat-value">${data.analyzed_reviews}</div>
-  <div class="stat-label">分析評論數</div>
+  <div class="stat-value">${data.rating}</div> 
+  <div class="stat-label">TMDB評分</div>
 </div>
 <div class="stat-box">
   <div class="stat-value">${data.very_positive}</div>
@@ -569,11 +569,6 @@ TMDB評分：${data.rating}
 </p>
 
 <p>
-<i class="fa-solid fa-fire"></i>
-熱度：${Math.round(data.popularity)}
-</p>
-
-<p>
 <i class="fa-solid fa-globe"></i>
 語言：${data.original_language}
 </p>
@@ -586,11 +581,6 @@ TMDB評分：${data.rating}
 <p>
 <i class="fa-solid fa-comments"></i>
 TMDB評論數：${data.tmdb_total_reviews}
-</p>
-
-<p>
-<i class="fa-solid fa-magnifying-glass-chart"></i>
-分析評論數：${data.analyzed_reviews}
 </p>
 
   </div>
