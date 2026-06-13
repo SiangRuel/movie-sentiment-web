@@ -1,7 +1,5 @@
 from flask import Flask, render_template, jsonify, request, redirect
 import json
-from collections import Counter
-import re
 from transformers import pipeline
 from dotenv import load_dotenv
 from openai import OpenAI
@@ -19,40 +17,6 @@ print("TMDB KEY OK:", TMDB_API_KEY[:5])
 # 不用了
 # classifier = pipeline("sentiment-analysis")
 
-
-# ⭐ 關鍵字（支援中文）
-def get_keywords(data):
-
-    stop_words = {
-        "電影",
-        "真的",
-        "覺得",
-        "就是",
-        "這部",
-        "一下",
-        "可以",
-        "看到",
-        "不是",
-        "什麼",
-        "這個",
-        "那個",
-        "第",
-    }
-
-    words = []
-
-    for r in data:
-
-        ws = re.findall(r"[\u4e00-\u9fff]{2,}", r)
-
-        for w in ws:
-
-            if w in stop_words:
-                continue
-
-            words.append(w)
-
-    return Counter(words).most_common(10)
 
 
 def analyze_sentiment_gpt(text):
@@ -105,60 +69,6 @@ def analyze_sentiment_gpt(text):
         print("Sentiment Error:", e)
 
         return 0
-
-
-def analyze_reviews_batch(movie_title, reviews):
-
-    if not reviews:
-        return None
-
-    try:
-
-        prompt = f"""
-你是一位專業電影評論分析師。
-
-電影名稱：
-
-{movie_title}
-
-以下是觀眾評論：
-
-{chr(10).join(reviews[:50])}
-
-請用 JSON 回答：
-
-{{
-    "very_positive": 數量,
-    "positive": 數量,
-    "neutral": 數量,
-    "negative": 數量,
-    "very_negative": 數量,
-
-    "best_positive_review": "最具代表性的好評",
-
-    "best_negative_review": "最具代表性的負評"
-}}
-
-不要解釋。
-只回傳 JSON。
-"""
-
-        response = client.chat.completions.create(
-            model="gpt-4o-mini", messages=[{"role": "user", "content": prompt}]
-        )
-
-        content = response.choices[0].message.content
-
-        content = content.replace("```json", "").replace("```", "").strip()
-
-        return json.loads(content)
-
-    except Exception as e:
-
-        print("Batch Analysis Error:", e)
-
-        return None
-
 
 def generate_ai_summary(movie_title, reviews):
 
@@ -318,7 +228,6 @@ def crawl_movie():
                 "positive": 0,
                 "negative": 0,
                 "neutral": 0,
-                "keywords": [],
                 "reviews": [],
             }
         )
@@ -421,15 +330,14 @@ def crawl_movie():
     negative = preds.count(-1)
     very_negative = preds.count(-2)
     five_star_reviews = []
-    positive_label = "尚無資料"
+    
 
     for r, p in zip(comments, preds):
 
         if p == 2:
             five_star_reviews.append({"text": r, "label": "★★★★★"})
 
-    if five_star_reviews:
-        positive_label = "★★★★★"
+  
 
     if not five_star_reviews:
 
@@ -438,19 +346,16 @@ def crawl_movie():
             if p == 1:
                 five_star_reviews.append({"text": r, "label": "★★★★☆"})
 
-        if five_star_reviews:
-            positive_label = "★★★★☆"
 
     one_star_reviews = []
-    negative_label = "尚無資料"
+    
 
     for r, p in zip(comments, preds):
 
         if p == -2:
             one_star_reviews.append({"text": r, "label": "★☆☆☆☆"})
 
-    if one_star_reviews:
-        negative_label = "★☆☆☆☆"
+
 
     if not one_star_reviews:
 
@@ -459,8 +364,7 @@ def crawl_movie():
             if p == -1:
                 one_star_reviews.append({"text": r, "label": "★★☆☆☆"})
 
-        if one_star_reviews:
-            negative_label = "★★☆☆☆"
+ 
 
     review_data = []
 
@@ -507,7 +411,6 @@ def crawl_movie():
             "very_negative": very_negative,
             "five_star_reviews": five_star_reviews,
             "one_star_reviews": one_star_reviews,
-            "keywords": get_keywords(comments),
             "reviews": review_data,
             "ai_summary": ai_summary,
         }
